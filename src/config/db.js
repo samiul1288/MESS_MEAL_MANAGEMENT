@@ -79,6 +79,12 @@ const initialize = async () => {
   );
   await pool.query(memberAccountMigration);
 
+  const mealAuditMigration = fs.readFileSync(
+    path.join(__dirname, '../../db/migrations/004_meal_entry_audit.sql'),
+    'utf8'
+  );
+  await pool.query(mealAuditMigration);
+
   return pool;
 };
 

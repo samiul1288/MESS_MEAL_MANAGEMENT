@@ -187,7 +187,7 @@ describe('HTTP authentication and meal CRUD', () => {
 
     const insert = querySpy.mock.calls.find(([sql]) => sql.includes('INSERT INTO meals'));
     expect(insert).toBeDefined();
-    expect(insert[0]).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7)');
+    expect(insert[0]).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7, $8)');
     expect(insert[1]).toEqual([
       7,
       '2026-10-09',
@@ -196,6 +196,62 @@ describe('HTTP authentication and meal CRUD', () => {
       2,
       45.5,
       41,
+      41,
     ]);
+  });
+
+  test('admin can add a meal to a selected member while audit records the admin', async () => {
+    querySpy
+      .mockResolvedValueOnce({
+        rows: [{
+          id: 5,
+          username: 'admin',
+          email: 'admin@example.test',
+          full_name: 'Test Admin',
+          password_hash: passwordHash,
+          role: 'admin',
+          mess_group_id: null,
+          is_active: true,
+        }],
+      })
+      .mockResolvedValueOnce({
+        rows: [{ id: 7, name: 'North Mess', code: 'NORTH' }],
+      })
+      .mockResolvedValueOnce({
+        rows: [{
+          id: 41,
+          full_name: 'Rafi Ahmed',
+          username: 'rafi',
+          mess_group_id: 7,
+          mess_group_name: 'North Mess',
+        }],
+      })
+      .mockResolvedValueOnce({ rowCount: 1, rows: [] });
+
+    const agent = request.agent(app);
+    await agent
+      .post('/auth/login')
+      .type('form')
+      .send({ username: 'admin', password: 'correct-password' })
+      .expect(302);
+
+    await agent
+      .post('/meals/create')
+      .type('form')
+      .send({
+        mess_group_id: '7',
+        member_id: '41',
+        meal_date: '2026-10-09',
+        meal_type: 'dinner',
+        menu_items: 'Rice and curry',
+        quantity: '1',
+        cost_per_head: '55.00',
+      })
+      .expect(302)
+      .expect('Location', '/meals');
+
+    const insert = querySpy.mock.calls.find(([sql]) => sql.includes('INSERT INTO meals'));
+    expect(insert[0]).toContain('created_by, entered_by');
+    expect(insert[1]).toEqual([7, '2026-10-09', 'dinner', 'Rice and curry', 1, 55, 41, 5]);
   });
 });

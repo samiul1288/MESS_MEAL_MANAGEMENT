@@ -65,6 +65,7 @@ CREATE TABLE meals (
     cost_per_head NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     total_cost NUMERIC(10, 2) GENERATED ALWAYS AS (quantity * cost_per_head) STORED,
     created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    entered_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT uq_meal_date_group_creator UNIQUE (mess_group_id, meal_date, meal_type, created_by)

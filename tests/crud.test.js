@@ -150,7 +150,85 @@ test('member meal creation ignores a submitted group and records the authenticat
 
   const insert = calls.find(([sql]) => sql.includes('INSERT INTO meals'));
   assert.ok(insert);
-  assert.deepEqual(insert[1], [7, '2026-10-09', 'lunch', 'Rice and vegetables', 12, 25.5, 41]);
+  assert.deepEqual(insert[1], [7, '2026-10-09', 'lunch', 'Rice and vegetables', 12, 25.5, 41, 41]);
+});
+
+test('admin meal creation assigns the selected member and records the admin actor', async () => {
+  const calls = [];
+  await withMockQuery(async (sql, params) => {
+    calls.push([sql, params]);
+    if (sql.includes('FROM mess_groups ORDER BY name')) {
+      return { rows: [{ id: 7, name: 'North Mess', code: 'NORTH' }] };
+    }
+    if (sql.includes('FROM users u') && sql.includes('mess_group_name')) {
+      return {
+        rows: [{
+          id: 41,
+          full_name: 'Rafi Ahmed',
+          username: 'rafi',
+          mess_group_id: 7,
+          mess_group_name: 'North Mess',
+        }],
+      };
+    }
+    if (sql.includes('INSERT INTO meals')) return { rowCount: 1, rows: [] };
+    assert.fail(`Unexpected admin meal SQL: ${sql}`);
+  }, async () => {
+    const req = {
+      session: { userId: 5, userRole: 'admin' },
+      body: {
+        mess_group_id: '7',
+        member_id: '41',
+        meal_date: '2026-10-09',
+        meal_type: 'lunch',
+        menu_items: 'Rice and vegetables',
+        quantity: '1',
+        cost_per_head: '45.50',
+      },
+    };
+    const res = response();
+    await mealsController.create(req, res);
+    assert.equal(res.redirectedTo, '/meals');
+    assert.match(req.session.flash.success, /selected member/);
+  });
+
+  const insert = calls.find(([sql]) => sql.includes('INSERT INTO meals'));
+  assert.ok(insert);
+  assert.match(insert[0], /created_by, entered_by/);
+  assert.deepEqual(insert[1], [7, '2026-10-09', 'lunch', 'Rice and vegetables', 1, 45.5, 41, 5]);
+});
+
+test('admin meal creation rejects a member from a different selected group', async () => {
+  let insertAttempted = false;
+  await withMockQuery(async (sql) => {
+    if (sql.includes('FROM mess_groups ORDER BY name')) {
+      return { rows: [{ id: 7, name: 'North Mess', code: 'NORTH' }] };
+    }
+    if (sql.includes('FROM users u') && sql.includes('mess_group_name')) {
+      return {
+        rows: [{ id: 41, full_name: 'Rafi Ahmed', username: 'rafi', mess_group_id: 8, mess_group_name: 'South Mess' }],
+      };
+    }
+    if (sql.includes('INSERT INTO meals')) insertAttempted = true;
+    assert.fail(`Unexpected query for mismatched group: ${sql}`);
+  }, async () => {
+    const res = response();
+    await mealsController.create({
+      session: { userId: 5, userRole: 'admin' },
+      body: {
+        mess_group_id: '7',
+        member_id: '41',
+        meal_date: '2026-10-09',
+        meal_type: 'lunch',
+        menu_items: 'Rice',
+        quantity: '1',
+        cost_per_head: '10',
+      },
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.ok(res.rendered.locals.validationErrors.some((error) => error.includes('does not belong')));
+  });
+  assert.equal(insertAttempted, false);
 });
 
 test('member payment query is constrained to their matching profile', async () => {

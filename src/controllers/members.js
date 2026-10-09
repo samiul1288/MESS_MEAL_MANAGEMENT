@@ -11,7 +11,11 @@ async function loadAccounts(excludeMemberId = null, db = pool) {
     `SELECT u.id, u.full_name, u.username, u.email,
             CASE WHEN m.id IS NULL THEN FALSE ELSE TRUE END AS linked
      FROM users u
-     LEFT JOIN members m ON m.user_id = u.id
+     LEFT JOIN members m ON (
+       m.user_id = u.id OR (
+         m.user_id IS NULL AND LOWER(m.email) = LOWER(u.email)
+       )
+     )
      WHERE u.role = 'member'
        AND (m.id IS NULL OR m.id = $1)
      ORDER BY u.full_name, u.username`,
@@ -160,7 +164,12 @@ exports.create = async (req, res) => {
         `SELECT u.id, u.email
          FROM users u
          WHERE u.id = $1 AND u.role = 'member'
-           AND NOT EXISTS (SELECT 1 FROM members m WHERE m.user_id = u.id)
+           AND NOT EXISTS (
+             SELECT 1 FROM members m
+             WHERE m.user_id = u.id OR (
+               m.user_id IS NULL AND LOWER(m.email) = LOWER(u.email)
+             )
+           )
          FOR UPDATE`,
         [member.account_id]
       );
@@ -277,7 +286,11 @@ exports.update = async (req, res) => {
          FROM users u
          WHERE u.id = $1 AND u.role = 'member'
            AND NOT EXISTS (
-             SELECT 1 FROM members m WHERE m.user_id = u.id AND m.id <> $2
+             SELECT 1 FROM members m
+             WHERE m.id <> $2
+               AND (m.user_id = u.id OR (
+                 m.user_id IS NULL AND LOWER(m.email) = LOWER(u.email)
+               ))
            )
          FOR UPDATE`,
         [member.account_id, req.params.id]

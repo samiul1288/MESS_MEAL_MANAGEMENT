@@ -36,6 +36,8 @@
 - [ ] Add a second member's meal for the same group/date/type; confirm both members can create their own entries.
 - [ ] Submit the same slot twice for one member; confirm the duplicate is rejected with a clear message.
 - [ ] As an admin, create, edit, filter, and delete a meal; confirm totals and messages update.
+- [ ] As an admin, add a meal for a selected linked member; verify the member's dashboard/report counts the meal and the admin is recorded as the entry actor.
+- [ ] As an admin, try assigning a member to a different mess group; confirm validation blocks saving.
 - [ ] Submit invalid dates, quantities, meal types, or amounts; confirm server-side validation rejects them.
 - [ ] Try a SQL-looking menu string such as `x'); DROP TABLE meals; --`; confirm it is stored/rendered as text and no SQL executes.
 

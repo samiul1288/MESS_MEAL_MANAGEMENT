@@ -51,7 +51,7 @@
             <th>Cost/H</th>
             <th>Total</th>
             <th>Group</th>
-            <% if (canManage) { %><th>Actions</th><% } %>
+            <% if (canManage) { %><th>Member</th><th>Entered by</th><th>Actions</th><% } %>
           </tr>
         </thead>
         <tbody>
@@ -66,6 +66,8 @@
                 <td><strong>₹<%= meal.total_cost.toFixed(2) %></strong></td>
                 <td><%= meal.mess_group_name %></td>
                 <% if (canManage) { %>
+                <td><%= meal.member_name || 'Unassigned' %></td>
+                <td><%= meal.entered_by_name || 'Legacy entry' %></td>
                 <td class="d-flex gap-1">
                   <a href="/meals/<%= meal.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
                   <form action="/meals/<%= meal.id %>/delete" method="POST" class="inline-form" data-confirm="Delete this meal?">
@@ -77,7 +79,7 @@
             <% }); %>
           <% } else { %>
             <tr>
-              <td colspan="<%= canManage ? 8 : 7 %>" class="text-center">No meals found</td>
+              <td colspan="<%= canManage ? 10 : 7 %>" class="text-center">No meals found</td>
             </tr>
           <% } %>
         </tbody>

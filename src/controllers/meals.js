@@ -20,12 +20,38 @@ async function loadGroups(req) {
 
 async function loadMemberAccounts() {
   const result = await pool.query(
-    `SELECT id, full_name, username
-     FROM users
-     WHERE role = 'member'
-     ORDER BY full_name`
+    `SELECT u.id, u.full_name, u.username, u.mess_group_id,
+            groups.name AS mess_group_name
+     FROM users u
+     JOIN mess_groups groups ON groups.id = u.mess_group_id
+     WHERE u.role = 'member'
+       AND EXISTS (
+         SELECT 1
+         FROM members member
+         WHERE member.mess_group_id = u.mess_group_id
+           AND (member.user_id = u.id OR (
+             member.user_id IS NULL AND LOWER(member.email) = LOWER(u.email)
+           ))
+       )
+     ORDER BY groups.name, u.full_name`
   );
   return result.rows;
+}
+
+async function renderCreateForm(req, res, formData, validationErrors, status = 200) {
+  const [messGroups, memberAccounts] = await Promise.all([
+    loadGroups(req),
+    req.session.userRole === 'admin' ? loadMemberAccounts() : Promise.resolve([]),
+  ]);
+  return res.status(status).render('meals/create', {
+    title: 'Add Meal — MessMate',
+    messGroups,
+    memberAccounts,
+    mealTypes,
+    canManage: req.session.userRole === 'admin',
+    formData,
+    validationErrors,
+  });
 }
 
 function validateMeal(body, groupId) {
@@ -95,9 +121,13 @@ exports.index = async (req, res) => {
     }
 
     const query = `
-      SELECT m.*, mg.name AS mess_group_name
+      SELECT m.*, mg.name AS mess_group_name,
+             owner.full_name AS member_name,
+             entered.full_name AS entered_by_name
       FROM meals m
       JOIN mess_groups mg ON m.mess_group_id = mg.id
+      LEFT JOIN users owner ON owner.id = m.created_by AND owner.role = 'member'
+      LEFT JOIN users entered ON entered.id = m.entered_by
       WHERE ${conditions.length ? conditions.join(' AND ') : 'TRUE'}
       ORDER BY m.meal_date DESC, m.meal_type
       LIMIT 100
@@ -131,14 +161,7 @@ exports.index = async (req, res) => {
 
 exports.createForm = async (req, res) => {
   try {
-    res.render('meals/create', {
-      title: 'Add Meal — MessMate',
-      messGroups: await loadGroups(req),
-      mealTypes,
-      canManage: req.session.userRole === 'admin',
-      formData: {},
-      validationErrors: [],
-    });
+    await renderCreateForm(req, res, {}, []);
   } catch (err) {
     console.error('Error loading meal form:', err);
     res.status(500).render('errors/500', { title: '500 — Server Error', message: 'Failed to load meal form' });
@@ -149,27 +172,55 @@ exports.create = async (req, res) => {
   try {
     const groupId = getGroupId(req);
     const { errors, meal } = validateMeal(req.body, groupId);
-    const groups = await loadGroups(req);
+    const [groups, memberAccounts] = await Promise.all([
+      loadGroups(req),
+      req.session.userRole === 'admin' ? loadMemberAccounts() : Promise.resolve([]),
+    ]);
     if (!groups.some((group) => String(group.id) === String(groupId))) {
       errors.push('Select a mess group you are allowed to use.');
+    }
+    let mealOwnerId = req.session.userId;
+    if (req.session.userRole === 'admin') {
+      if (!positiveInteger(req.body.member_id)) {
+        errors.push('Select the member this meal belongs to.');
+      } else {
+        const account = memberAccounts.find((member) => String(member.id) === String(req.body.member_id));
+        if (!account) {
+          errors.push('Select a member account linked to a profile.');
+        } else if (String(account.mess_group_id) !== String(groupId)) {
+          errors.push('The selected member does not belong to the selected mess group.');
+        } else {
+          mealOwnerId = account.id;
+        }
+      }
     }
     if (errors.length) {
       return res.status(400).render('meals/create', {
         title: 'Add Meal — MessMate', messGroups: groups, mealTypes, formData: req.body,
-        validationErrors: errors, canManage: req.session.userRole === 'admin',
+        memberAccounts, validationErrors: errors, canManage: req.session.userRole === 'admin',
       });
     }
 
     await pool.query(
-      `INSERT INTO meals (mess_group_id, meal_date, meal_type, menu_items, quantity, cost_per_head, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [meal.mess_group_id, meal.meal_date, meal.meal_type, meal.menu_items, Number(meal.quantity), Number(meal.cost_per_head), req.session.userId]
+      `INSERT INTO meals
+         (mess_group_id, meal_date, meal_type, menu_items, quantity, cost_per_head, created_by, entered_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        Number(meal.mess_group_id), meal.meal_date, meal.meal_type, meal.menu_items,
+        Number(meal.quantity), Number(meal.cost_per_head), mealOwnerId, req.session.userId,
+      ]
     );
-    req.session.flash = { success: 'Meal added successfully.' };
+    req.session.flash = {
+      success: req.session.userRole === 'admin'
+        ? 'Meal added to the selected member’s account.'
+        : 'Meal added successfully.',
+    };
     return res.redirect('/meals');
   } catch (err) {
     if (err.code === '23505') {
-      req.session.flash = { error: 'You already have a meal entry for this group, date, and meal type.' };
+      req.session.flash = {
+        error: 'A meal entry already exists for this member, group, date, and meal type.',
+      };
       return res.redirect('/meals/create');
     }
     console.error('Error creating meal:', err);

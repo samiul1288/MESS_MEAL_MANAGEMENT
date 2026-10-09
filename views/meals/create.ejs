@@ -24,6 +24,24 @@
             <input class="form-control" id="mess_group_display" value="<%= messGroups[0] ? `${messGroups[0].name} (${messGroups[0].code})` : 'No mess group assigned' %>" disabled>
           <% } %>
         </div>
+        <% if (canManage) { %>
+          <div class="col-md-6 mb-3">
+            <label class="form-label" for="member_id">Add this meal to member</label>
+            <select class="form-select" id="member_id" name="member_id" required>
+              <option value="">Select a linked member</option>
+              <% memberAccounts.forEach(member => { %>
+                <option value="<%= member.id %>" data-group-id="<%= member.mess_group_id %>" <%= String(formData.member_id || '') === String(member.id) ? 'selected' : '' %>>
+                  <%= member.full_name %> (@<%= member.username %>) — <%= member.mess_group_name %>
+                </option>
+              <% }); %>
+            </select>
+            <% if (!memberAccounts.length) { %>
+              <div class="form-text text-danger">No linked member accounts found. Add a member profile and link its registered login account first.</div>
+            <% } else { %>
+              <div class="form-text">The meal will count toward this member’s meals; your admin account is recorded as the person who entered it.</div>
+            <% } %>
+          </div>
+        <% } %>
         <div class="col-md-3 mb-3">
           <label class="form-label" for="meal_date">Date</label>
           <input type="date" class="form-control" id="meal_date" name="meal_date" value="<%= formData.meal_date || '' %>" required>
@@ -49,6 +67,16 @@
           <input type="number" class="form-control" id="cost_per_head" name="cost_per_head" min="0" max="99999999.99" step="0.01" value="<%= formData.cost_per_head || '0' %>" required>
         </div>
       </div>
+      <% if (canManage) { %>
+      <script nonce="<%= cspNonce %>">
+        const memberSelect = document.getElementById('member_id');
+        const groupSelect = document.getElementById('mess_group_id');
+        memberSelect.addEventListener('change', () => {
+          const groupId = memberSelect.selectedOptions[0]?.dataset.groupId;
+          if (groupId) groupSelect.value = groupId;
+        });
+      </script>
+      <% } %>
       <div class="d-flex gap-2">
         <button type="submit" class="btn btn-primary">Save Meal</button>
         <a href="/meals" class="btn btn-outline-secondary">Cancel</a>
