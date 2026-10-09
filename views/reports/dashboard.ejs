@@ -1,0 +1,78 @@
+<h1>Admin Dashboard</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" action="/reports" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label" for="mess_group_id">Mess group</label>
+        <select class="form-select" id="mess_group_id" name="mess_group_id">
+          <option value="0" <%= Number(messGroupId) === 0 ? 'selected' : '' %>>All mess groups</option>
+          <% messGroups.forEach(group => { %>
+            <option value="<%= group.id %>" <%= Number(messGroupId) === Number(group.id) ? 'selected' : '' %>><%= group.name %> (<%= group.code %>)</option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-auto"><button class="btn btn-primary" type="submit">Apply filter</button></div>
+      <div class="col-auto"><a class="btn btn-outline-secondary" href="/reports">Reset</a></div>
+    </form>
+    <div class="text-muted mt-2">Showing: <%= messGroupName %></div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-3 mb-3"><div class="card stats-card h-100"><div class="card-body">
+    <h5>Total Members</h5><h2><%= stats.totalMembers %></h2><small><%= stats.activeMembers %> active</small>
+  </div></div></div>
+  <div class="col-md-3 mb-3"><div class="card stats-card h-100"><div class="card-body">
+    <h5>Total Meal Units</h5><h2><%= stats.totalMeals %></h2><small>Served to date</small>
+  </div></div></div>
+  <div class="col-md-3 mb-3"><div class="card stats-card h-100"><div class="card-body">
+    <h5>Total Expenses</h5><h2 class="text-danger">₹<%= stats.totalExpenses %></h2><small>Recorded to date</small>
+  </div></div></div>
+  <div class="col-md-3 mb-3"><div class="card stats-card h-100"><div class="card-body">
+    <h5>Current Meal Rate</h5><h2 class="text-success">₹<%= stats.currentMealRate %></h2><small>This month: shared expenses ÷ meal units</small>
+  </div></div></div>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 mb-3">
+    <div class="card h-100">
+      <div class="card-header bg-white"><h5 class="mb-0">Meals and expenses — last six months</h5></div>
+      <div class="card-body"><canvas id="adminMonthlyChart" aria-label="Monthly meals and expenses" role="img"></canvas></div>
+    </div>
+  </div>
+  <div class="col-lg-4 mb-3">
+    <div class="card h-100"><div class="card-header bg-white"><h5 class="mb-0">Quick actions</h5></div>
+      <div class="card-body d-grid gap-2">
+        <a href="/meals/create" class="btn btn-outline-primary">Add meal</a>
+        <a href="/expenses/create" class="btn btn-outline-primary">Add bazar expense</a>
+        <a href="/payments/create" class="btn btn-outline-primary">Add payment</a>
+        <a href="/reports/monthly" class="btn btn-outline-info">Monthly report</a>
+        <a href="/reports/meals" class="btn btn-outline-info">Meal report</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%= cspNonce %>">
+  const monthlyLabels = <%- JSON.stringify(chart.map((row) => row.month)) %>;
+  const monthlyMealUnits = <%- JSON.stringify(chart.map((row) => Number(row.meal_units))) %>;
+  const monthlyExpenses = <%- JSON.stringify(chart.map((row) => Number(row.expenses))) %>;
+  new Chart(document.getElementById('adminMonthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: monthlyLabels,
+      datasets: [
+        { label: 'Meal units', data: monthlyMealUnits, backgroundColor: '#0d6efd', yAxisID: 'y' },
+        { label: 'Expenses (₹)', data: monthlyExpenses, backgroundColor: '#dc3545', yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Meal units' } },
+        y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Expenses (₹)' } }
+      }
+    }
+  });
+</script>

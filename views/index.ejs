@@ -1,0 +1,38 @@
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-kicker">A better way to run your mess</span>
+    <h1>Good meals.<br>Clear accounts.</h1>
+    <p>Keep daily meal entries, bazar expenses, and member payments organized in one calm, transparent workspace.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" href="<%= primaryHref %>"><%= primaryLabel %></a>
+      <% if (!currentUser || !currentUser.userId) { %>
+        <a class="btn btn-outline-secondary btn-lg" href="/auth/login">Sign in</a>
+      <% } else { %>
+        <a class="btn btn-outline-secondary btn-lg" href="/profile">View profile</a>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" aria-labelledby="features-heading">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+    <div>
+      <span class="hero-kicker">Everything in one place</span>
+      <h2 id="features-heading" class="mb-0 mt-1">Less confusion, more clarity.</h2>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-4"><article class="card feature-card"><div class="card-body">
+      <div class="feature-icon mb-3" aria-hidden="true">01</div>
+      <h3 class="h5">Daily meals</h3><p class="text-muted mb-0">Record meal entries and follow your personal meal history.</p>
+    </div></article></div>
+    <div class="col-md-4"><article class="card feature-card"><div class="card-body">
+      <div class="feature-icon mb-3" aria-hidden="true">02</div>
+      <h3 class="h5">Shared expenses</h3><p class="text-muted mb-0">Keep bazar costs visible and understand how the meal rate is calculated.</p>
+    </div></article></div>
+    <div class="col-md-4"><article class="card feature-card"><div class="card-body">
+      <div class="feature-icon mb-3" aria-hidden="true">03</div>
+      <h3 class="h5">Clear balances</h3><p class="text-muted mb-0">Track payments, monthly dues, and advance balances with confidence.</p>
+    </div></article></div>
+  </div>
+</section>

@@ -1,0 +1,58 @@
+<h1>✏️ Edit Member</h1>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="/members/<%= member.id %>/update" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="mess_group_id">Mess Group</label>
+          <select class="form-select" id="mess_group_id" name="mess_group_id" required>
+            <% messGroups.forEach(g => { %>
+              <option value="<%= g.id %>" <%= member.mess_group_id == g.id ? 'selected' : '' %>><%= g.name %> (<%= g.code %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="roll_number">Roll Number</label>
+          <input type="text" class="form-control" id="roll_number" name="roll_number" value="<%= member.roll_number %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="name">Name</label>
+          <input type="text" class="form-control" id="name" name="name" value="<%= member.name %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="hall">Hall</label>
+          <input type="text" class="form-control" id="hall" name="hall" value="<%= member.hall %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="room">Room</label>
+          <input type="text" class="form-control" id="room" name="room" value="<%= member.room || '' %>">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="batch">Batch</label>
+          <input type="text" class="form-control" id="batch" name="batch" value="<%= member.batch || '' %>">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="phone">Phone</label>
+          <input type="text" class="form-control" id="phone" name="phone" value="<%= member.phone || '' %>">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" class="form-control" id="email" name="email" value="<%= member.email %>">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label" for="status">Status</label>
+          <select class="form-select" id="status" name="status">
+            <option value="active" <%= member.status == 'active' ? 'selected' : '' %>>Active</option>
+            <option value="inactive" <%= member.status == 'inactive' ? 'selected' : '' %>>Inactive</option>
+            <option value="suspended" <%= member.status == 'suspended' ? 'selected' : '' %>>Suspended</option>
+          </select>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Update Member</button>
+        <a href="/members" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

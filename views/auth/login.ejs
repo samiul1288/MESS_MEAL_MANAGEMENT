@@ -1,0 +1,27 @@
+<section class="auth-page">
+  <div class="card auth-card">
+    <div class="card-body">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span class="h3 mb-0">MessMate</span>
+      </div>
+      <div class="text-center mb-4">
+        <h1 class="h2 mb-2">Welcome back</h1>
+        <p class="text-muted mb-0">Sign in to continue to your mess account.</p>
+      </div>
+
+      <form action="/auth/login" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" autocomplete="username" required autofocus>
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign in</button>
+      </form>
+      <p class="text-center text-muted mt-4 mb-0">New to MessMate? <a href="/auth/register">Create an account</a></p>
+    </div>
+  </div>
+</section>

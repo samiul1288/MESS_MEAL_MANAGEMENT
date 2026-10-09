@@ -1,0 +1,65 @@
+<h1>📊 Payments Report</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Member Dues</h5>
+    <form method="get" action="/reports/payments" class="d-flex gap-2">
+      <label class="visually-hidden" for="payment_date_from">From date</label>
+      <input class="form-control" id="payment_date_from" type="date" name="date_from" value="<%= currentFilters?.date_from || '' %>">
+      <label class="visually-hidden" for="payment_date_to">To date</label>
+      <input class="form-control" id="payment_date_to" type="date" name="date_to" value="<%= currentFilters?.date_to || '' %>">
+      <button class="btn btn-outline-secondary" type="submit">Filter</button>
+      <a href="/reports/payments" class="btn btn-secondary">Reset</a>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-6">
+        <h5>Total Transactions: <%= totals.totalCount %></h5>
+      </div>
+      <div class="col-6 text-end">
+        <h5>Paid: ₹<%= totals.totalPaid %></h5>
+        <h5>Pending: ₹<%= totals.totalPending %></h5>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Member</th>
+            <th>Month</th>
+            <th>Date</th>
+            <th>Amount (₹)</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (payments && payments.length > 0) { %>
+            <% payments.forEach(p => { %>
+              <tr>
+                <td><%= p.member_name %></td>
+                <td><%= p.payment_month %></td>
+                <td><%= p.payment_date ? p.payment_date : 'Pending' %></td>
+                <td>₹<%= p.amount.toFixed(2) %></td>
+                <td><%= p.payment_method %></td>
+                <td>
+                  <span class="badge bg-<%= p.status === 'paid' ? 'success' : 'warning' %>">
+                    <%= p.status %>
+                  </span>
+                </td>
+                <td class="note-cell"><%= p.notes || '-' %></td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" class="text-center">No payments found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

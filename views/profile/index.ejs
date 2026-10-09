@@ -1,0 +1,32 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <span class="hero-kicker">Account</span>
+    <h1 class="mb-1">Your profile</h1>
+    <p class="text-muted mb-0">Your account and mess membership details.</p>
+  </div>
+  <a class="btn btn-outline-primary" href="<%= homeUrl %>">Back to dashboard</a>
+</div>
+
+<section class="card">
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="profile-avatar" aria-hidden="true"><%= user.full_name.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase() %></div>
+      <div>
+        <h2 class="mb-1"><%= user.full_name %></h2>
+        <span class="badge text-bg-success"><%= user.role %></span>
+        <span class="badge text-bg-<%= user.is_active ? 'light' : 'secondary' %>"><%= user.is_active ? 'Active' : 'Inactive' %></span>
+      </div>
+    </div>
+    <dl class="row g-3 mb-0">
+      <div class="col-md-6"><div class="profile-field"><dt>Username</dt><dd><%= user.username %></dd></div></div>
+      <div class="col-md-6"><div class="profile-field"><dt>Email</dt><dd><%= user.email %></dd></div></div>
+      <div class="col-md-6"><div class="profile-field"><dt>Mess group</dt><dd><%= user.mess_group_name || 'Not assigned' %></dd></div></div>
+      <div class="col-md-6"><div class="profile-field"><dt>Member profile</dt><dd><%= member ? `${member.name} · ${member.roll_number}` : 'Not linked' %></dd></div></div>
+      <% if (member) { %>
+        <div class="col-md-6"><div class="profile-field"><dt>Hall and room</dt><dd><%= member.hall %><%= member.room ? ` · Room ${member.room}` : '' %></dd></div></div>
+        <div class="col-md-6"><div class="profile-field"><dt>Contact</dt><dd><%= member.phone || 'Not provided' %></dd></div></div>
+      <% } %>
+      <div class="col-md-6"><div class="profile-field"><dt>Account created</dt><dd><%= new Date(user.created_at).toLocaleDateString() %></dd></div></div>
+    </dl>
+  </div>
+</section>

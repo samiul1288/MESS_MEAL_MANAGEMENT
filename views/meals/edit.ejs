@@ -1,0 +1,52 @@
+<h1>✏️ Edit Meal</h1>
+
+<% if (validationErrors && validationErrors.length) { %>
+  <div class="alert alert-danger mt-3" role="alert">
+    <ul class="mb-0"><% validationErrors.forEach(error => { %><li><%= error %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="/meals/<%= meal.id %>/update" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="mess_group_id">Mess Group</label>
+          <select class="form-select" id="mess_group_id" name="mess_group_id" required>
+            <% messGroups.forEach(g => { %>
+              <option value="<%= g.id %>" <%= formData.mess_group_id == g.id ? 'selected' : '' %>><%= g.name %> (<%= g.code %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="meal_date">Date</label>
+          <input type="date" class="form-control" id="meal_date" name="meal_date" value="<%= formData.meal_date %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="meal_type">Type</label>
+          <select class="form-select" id="meal_type" name="meal_type" required>
+            <% mealTypes.forEach(type => { %>
+              <option value="<%= type %>" <%= formData.meal_type === type ? 'selected' : '' %>><%= type.charAt(0).toUpperCase() + type.slice(1) %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-12 mb-3">
+          <label class="form-label" for="menu_items">Menu Items</label>
+          <textarea class="form-control" id="menu_items" name="menu_items" rows="2" maxlength="5000" required><%= formData.menu_items || '' %></textarea>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="quantity">Quantity</label>
+          <input type="number" class="form-control" id="quantity" name="quantity" min="0" max="2147483647" step="1" value="<%= formData.quantity %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="cost_per_head">Cost Per Head (₹)</label>
+          <input type="number" class="form-control" id="cost_per_head" name="cost_per_head" min="0" max="99999999.99" step="0.01" value="<%= formData.cost_per_head %>" required>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Update Meal</button>
+        <a href="/meals" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<h1>🍽️ Meal Management</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white">
+    <form class="row g-3 align-items-center" method="get">
+      <div class="col-md-3">
+        <input class="form-control" type="search" name="search" aria-label="Search meals" placeholder="Search meals..." value="<%= currentFilters?.search || '' %>">
+      </div>
+      <% if (canManage) { %>
+      <div class="col-md-2">
+        <select class="form-select" name="meal_type" aria-label="Filter by meal type">
+          <option value="">All Types</option>
+          <option value="breakfast" <%= currentFilters?.meal_type == 'breakfast' ? 'selected' : '' %>>Breakfast</option>
+          <option value="lunch" <%= currentFilters?.meal_type == 'lunch' ? 'selected' : '' %>>Lunch</option>
+          <option value="dinner" <%= currentFilters?.meal_type == 'dinner' ? 'selected' : '' %>>Dinner</option>
+          <option value="snack" <%= currentFilters?.meal_type == 'snack' ? 'selected' : '' %>>Snack</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" name="member_id" aria-label="Filter by member">
+          <option value="">All members</option>
+          <% members.forEach(member => { %>
+            <option value="<%= member.id %>" <%= String(currentFilters?.member_id || '') === String(member.id) ? 'selected' : '' %>><%= member.full_name %></option>
+          <% }); %>
+        </select>
+      </div>
+      <% } %>
+      <div class="col-md-2">
+        <input class="form-control" type="date" name="date_from" aria-label="Meals from date" value="<%= currentFilters?.date_from || '' %>">
+      </div>
+      <div class="col-md-2">
+        <input class="form-control" type="date" name="date_to" aria-label="Meals through date" value="<%= currentFilters?.date_to || '' %>">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+      </div>
+      <div class="col-md-1">
+        <a class="btn btn-outline-secondary w-100" href="/meals/create">+</a>
+      </div>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Menu</th>
+            <th>Quantity</th>
+            <th>Cost/H</th>
+            <th>Total</th>
+            <th>Group</th>
+            <% if (canManage) { %><th>Actions</th><% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (meals && meals.length > 0) { %>
+            <% meals.forEach(meal => { %>
+              <tr>
+                <td><%= meal.meal_date %></td>
+                <td><span class="badge bg-info"><%= meal.meal_type %></span></td>
+                <td><%= meal.menu_items %></td>
+                <td><%= meal.quantity %></td>
+                <td>₹<%= meal.cost_per_head.toFixed(2) %></td>
+                <td><strong>₹<%= meal.total_cost.toFixed(2) %></strong></td>
+                <td><%= meal.mess_group_name %></td>
+                <% if (canManage) { %>
+                <td class="d-flex gap-1">
+                  <a href="/meals/<%= meal.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form action="/meals/<%= meal.id %>/delete" method="POST" class="inline-form" data-confirm="Delete this meal?">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+                <% } %>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="<%= canManage ? 8 : 7 %>" class="text-center">No meals found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

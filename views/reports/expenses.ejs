@@ -1,0 +1,118 @@
+<h1>📊 Expense Report</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Filter: <%= messGroupName %></h5>
+    <form method="get" action="/reports/expenses" class="d-flex gap-2">
+      <input type="hidden" name="mess_group_id" value="<%= messGroupId %>">
+      <label class="visually-hidden" for="expense_date_from">From date</label>
+      <input class="form-control" id="expense_date_from" type="date" name="date_from" value="<%= currentFilters?.date_from || '' %>">
+      <label class="visually-hidden" for="expense_date_to">To date</label>
+      <input class="form-control" id="expense_date_to" type="date" name="date_to" value="<%= currentFilters?.date_to || '' %>">
+      <label class="visually-hidden" for="expense_category">Expense category</label>
+      <select class="form-select" id="expense_category" name="category">
+        <option value="">All Categories</option>
+        <% ['food', 'medicine', 'repair', 'utility', 'miscellaneous'].forEach(c => { %>
+          <option value="<%= c %>" <%= currentFilters?.category == c ? 'selected' : '' %>><%= c.charAt(0).toUpperCase() + c.slice(1) %></option>
+        <% }) %>
+      </select>
+      <button class="btn btn-outline-secondary" type="submit">Filter</button>
+      <a href="/reports/expenses" class="btn btn-secondary">Reset</a>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-6">
+        <h5>Total Expenses: <%= totals.totalCount %> items</h5>
+      </div>
+      <div class="col-6 text-end">
+        <h5>Total Amount: ₹<%= totals.totalAmount %></h5>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col">
+        <canvas id="expenseChart"></canvas>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered mt-3">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount (₹)</th>
+            <th>Vendor</th>
+            <th>Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (expenses && expenses.length > 0) { %>
+            <% expenses.forEach(expense => { %>
+              <tr>
+                <td><%= expense.expense_date %></td>
+                <td><%= expense.category %></td>
+                <td><%= expense.description %></td>
+                <td>₹<%= expense.amount.toFixed(2) %></td>
+                <td><%= expense.vendor || '-' %></td>
+                <td><%= expense.payment_method %></td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center">No expenses found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script nonce="<%= cspNonce %>">
+  // Chart.js donut chart for expense breakdown
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('expenseChart').getContext('2d');
+    const labels = [];
+    const values = [];
+    const colors = [];
+    const bgColors = [];
+
+    <% Object.entries(categories).forEach(([cat, data], i) => { %>
+      <% if (parseInt(data.count) > 0) { %>
+        labels.push('<%= cat.charAt(0).toUpperCase() + cat.slice(1) %>');
+        values.push(<%= data.amount %>);
+        colors.push('<%= ['#28a745', '#17a2b8', '#ffc107', '#dc3545', '#6f42c1'][i] %>');
+        bgColors.push('<%= ['#d4edda', '#cce5ff', '#fff3cd', '#f8d7da', '#e8d5ff'][i] %>');
+      <% } %>
+    <% }); %>
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 0,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((context.parsed / total * 100).toFixed(1)) : 0;
+                return context.label + ': ₹' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>

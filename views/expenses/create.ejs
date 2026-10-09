@@ -1,0 +1,66 @@
+<h1>➕ Add Expense</h1>
+
+<% if (validationErrors && validationErrors.length) { %>
+  <div class="alert alert-danger mt-3" role="alert">
+    <ul class="mb-0"><% validationErrors.forEach(error => { %><li><%= error %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="/expenses/create" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="mess_group_id">Mess Group</label>
+          <select class="form-select" id="mess_group_id" name="mess_group_id" required>
+            <option value="">Select a group</option>
+            <% messGroups.forEach(g => { %>
+              <option value="<%= g.id %>" <%= formData.mess_group_id == g.id ? 'selected' : '' %>><%= g.name %> (<%= g.code %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="expense_date">Date</label>
+          <input type="date" class="form-control" id="expense_date" name="expense_date" value="<%= formData.expense_date || '' %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="category">Category</label>
+          <select class="form-select" id="category" name="category" required>
+            <% categories.forEach(category => { %>
+              <option value="<%= category %>" <%= formData.category === category ? 'selected' : '' %>><%= category.charAt(0).toUpperCase() + category.slice(1) %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-12 mb-3">
+          <label class="form-label" for="description">Description</label>
+          <textarea class="form-control" id="description" name="description" rows="2" maxlength="5000" placeholder="What was purchased?" required><%= formData.description || '' %></textarea>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="amount">Amount (₹)</label>
+          <input type="number" class="form-control" id="amount" name="amount" min="0" max="99999999.99" step="0.01" value="<%= formData.amount || '' %>" placeholder="Total amount" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="vendor">Vendor</label>
+          <input type="text" class="form-control" id="vendor" name="vendor" maxlength="100" value="<%= formData.vendor || '' %>" placeholder="Vendor/supplier name">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="payment_method">Payment Method</label>
+          <select class="form-select" id="payment_method" name="payment_method">
+            <option value="">Select a method</option>
+            <% ['Cash', 'Card', 'Online', 'UPI'].forEach(method => { %>
+              <option value="<%= method %>" <%= formData.payment_method === method ? 'selected' : '' %>><%= method %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="notes">Notes</label>
+          <textarea class="form-control" id="notes" name="notes" rows="2" maxlength="5000" placeholder="Additional details"><%= formData.notes || '' %></textarea>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save Expense</button>
+        <a href="/expenses" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

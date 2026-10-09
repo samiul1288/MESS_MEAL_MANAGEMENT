@@ -1,0 +1,82 @@
+<h1>📊 Expense Management</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white">
+    <form class="row g-3 align-items-center" method="get">
+      <div class="col-md-3">
+        <input class="form-control" type="search" name="search" aria-label="Search expenses" placeholder="Search expenses..." value="<%= currentFilters?.search || '' %>">
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" name="category" aria-label="Filter by category">
+          <option value="">All Categories</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c %>" <%= currentFilters?.category == c ? 'selected' : '' %>><%= c.charAt(0).toUpperCase() + c.slice(1) %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" name="member_id" aria-label="Filter by member">
+          <option value="">All members</option>
+          <% members.forEach(member => { %>
+            <option value="<%= member.id %>" <%= String(currentFilters?.member_id || '') === String(member.id) ? 'selected' : '' %>><%= member.full_name %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input class="form-control" type="date" name="date_from" aria-label="Expenses from date" value="<%= currentFilters?.date_from || '' %>">
+      </div>
+      <div class="col-md-2">
+        <input class="form-control" type="date" name="date_to" aria-label="Expenses through date" value="<%= currentFilters?.date_to || '' %>">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+      </div>
+      <div class="col-md-1">
+        <a class="btn btn-outline-secondary w-100" href="/expenses/create" aria-label="Add bazar expense">Add</a>
+      </div>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount (₹)</th>
+            <th>Vendor</th>
+            <th>Method</th>
+            <th>Group</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (expenses && expenses.length > 0) { %>
+            <% expenses.forEach(expense => { %>
+              <tr>
+                <td><%= expense.expense_date %></td>
+                <td><span class="badge bg-<%= expense.category === 'food' ? 'success' : expense.category === 'utility' ? 'info' : expense.category === 'repair' ? 'warning' : 'danger' %>"><%= expense.category %></span></td>
+                <td><%= expense.description %></td>
+                <td><strong>₹<%= expense.amount.toFixed(2) %></strong></td>
+                <td><%= expense.vendor %></td>
+                <td><%= expense.payment_method %></td>
+                <td><%= expense.mess_group_name %></td>
+                <td class="d-flex gap-1">
+                  <a href="/expenses/<%= expense.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form action="/expenses/<%= expense.id %>/delete" method="POST" class="inline-form" data-confirm="Delete this expense?">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="8" class="text-center">No expenses found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

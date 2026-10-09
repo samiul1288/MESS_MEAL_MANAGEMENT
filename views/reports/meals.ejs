@@ -1,0 +1,55 @@
+<h1>📊 Meal Report</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Filter: <%= messGroupName %></h5>
+    <form method="get" action="/reports/meals" class="d-flex gap-2">
+      <input type="hidden" name="mess_group_id" value="<%= messGroupId %>">
+      <label class="visually-hidden" for="report_date_from">From date</label>
+      <input class="form-control" id="report_date_from" type="date" name="date_from" value="<%= currentFilters?.date_from || '' %>">
+      <label class="visually-hidden" for="report_date_to">To date</label>
+      <input class="form-control" id="report_date_to" type="date" name="date_to" value="<%= currentFilters?.date_to || '' %>">
+      <button class="btn btn-outline-secondary" type="submit">Filter</button>
+      <a href="/reports/meals" class="btn btn-secondary">Reset</a>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-6">
+        <h5>Total Meals: <%= totals.totalCount %></h5>
+      </div>
+      <div class="col-6 text-end">
+        <h5>Total Cost: ₹<%= totals.totalCost %></h5>
+      </div>
+    </div>
+
+    <table class="table table-bordered mt-3">
+      <thead>
+        <tr>
+          <th>Meal Type</th>
+          <th>Count</th>
+          <th>Total Cost (₹)</th>
+          <th>% of Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let sum = 0; %>
+        <% Object.entries(categories).forEach(([type, data]) => { %>
+          <% sum += parseInt(data.count) || 0; %>
+          <tr>
+            <td><strong><%= type.charAt(0).toUpperCase() + type.slice(1) %></strong></td>
+            <td><%= data.count %></td>
+            <td>₹<%= data.total_cost %></td>
+            <td><%= sum > 0 ? ((parseInt(data.count) / sum * 100).toFixed(1) + '%') : '0%' %></td>
+          </tr>
+        <% }); %>
+        <tr class="table-success">
+          <td><strong>Total</strong></td>
+          <td><strong><%= totals.totalCount %></strong></td>
+          <td><strong>₹<%= totals.totalCost %></strong></td>
+          <td>100%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

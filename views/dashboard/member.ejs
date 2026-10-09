@@ -1,0 +1,71 @@
+<h1>My Dashboard</h1>
+<p class="text-muted">
+  <%= member ? `${member.name} (${member.roll_number})` : 'Your account is not linked to a member profile yet.' %>
+  · <%= new Date().toLocaleString('en', { month: 'long', year: 'numeric' }) %>
+</p>
+
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>My Meals</h5><h2><%= stats.mealUnits %></h2>
+      <small><%= stats.mealEntries %> entries this month</small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>Current Meal Rate</h5><h2>₹<%= stats.mealRate %></h2>
+      <small>Shared group expenses ÷ meal units</small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>My Meal Cost</h5><h2>₹<%= stats.mealCost %></h2>
+      <small>Based on this month's meal rate</small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>My Balance</h5>
+      <h2 class="<%= Number(stats.balance) >= 0 ? 'text-primary' : 'text-danger' %>">
+        <%= Number(stats.balance) >= 0 ? '+' : '-' %>₹<%= Math.abs(Number(stats.balance)).toFixed(2) %>
+      </h2>
+      <small><%= Number(stats.balance) >= 0 ? 'Available advance credit' : 'Outstanding meal due' %></small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>Payments Recorded</h5><h2 class="text-success">₹<%= stats.paid %></h2>
+      <small>Paid and partial payments this month</small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>Due</h5><h2 class="text-danger">₹<%= stats.due %></h2>
+      <small>Meal cost not covered by payments</small>
+    </div></div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="card stats-card h-100"><div class="card-body">
+      <h5>Advance</h5><h2 class="text-primary">₹<%= stats.advance %></h2>
+      <small>Payments above this month's meal cost</small>
+    </div></div>
+  </div>
+</div>
+
+<div class="card mt-2">
+  <div class="card-header bg-white"><h5 class="mb-0">My daily meals this month</h5></div>
+  <div class="card-body"><canvas id="memberMealsChart" aria-label="Daily meal units" role="img"></canvas></div>
+</div>
+
+<script nonce="<%= cspNonce %>">
+  const memberMealDays = <%- JSON.stringify(chart.map((row) => String(row.day).slice(0, 10))) %>;
+  const memberMealCounts = <%- JSON.stringify(chart.map((row) => Number(row.meal_count))) %>;
+  new Chart(document.getElementById('memberMealsChart'), {
+    type: 'bar',
+    data: {
+      labels: memberMealDays,
+      datasets: [{ label: 'Meal units', data: memberMealCounts, backgroundColor: '#0d6efd' }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+</script>

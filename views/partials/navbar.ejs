@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg app-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <span class="brand-mark" aria-hidden="true">M</span>
+      <span>MessMate</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <% if (currentUser && currentUser.userId) { %>
+          <% if (currentUser.userRole === 'admin') { %>
+            <li class="nav-item"><a class="nav-link" href="/reports">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/meals">Meals</a></li>
+            <li class="nav-item"><a class="nav-link" href="/expenses">Expenses</a></li>
+            <li class="nav-item"><a class="nav-link" href="/payments">Payments</a></li>
+            <li class="nav-item"><a class="nav-link" href="/members">Members</a></li>
+            <li class="nav-item"><a class="nav-link" href="/reports/monthly">Reports</a></li>
+          <% } else if (currentUser.userRole === 'member') { %>
+            <li class="nav-item"><a class="nav-link" href="/dashboard">My dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="/meals">Meals</a></li>
+            <li class="nav-item"><a class="nav-link" href="/payments">Payments</a></li>
+          <% } else { %>
+            <li class="nav-item"><a class="nav-link" href="/meals">Meals</a></li>
+          <% } %>
+          <li class="nav-item"><a class="nav-link" href="/profile">Profile</a></li>
+          <li class="nav-item"><span class="nav-user"><%= currentUser.fullName || currentUser.username %></span></li>
+          <li class="nav-item">
+            <form action="/auth/logout" method="POST">
+              <button class="nav-link border-0 bg-transparent" type="submit">Sign out</button>
+            </form>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link" href="/auth/login">Sign in</a></li>
+          <li class="nav-item ms-lg-2"><a class="btn btn-primary btn-sm" href="/auth/register">Create account</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,91 @@
+<h1>Monthly Report</h1>
+
+<% if (errors && errors.length) { %>
+  <div class="alert alert-danger" role="alert">
+    <ul class="mb-0"><% errors.forEach(error => { %><li><%= error %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" action="/reports/monthly" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label" for="date_from">From</label>
+        <input class="form-control" id="date_from" type="date" name="date_from" value="<%= currentFilters.date_from || '' %>" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="date_to">To</label>
+        <input class="form-control" id="date_to" type="date" name="date_to" value="<%= currentFilters.date_to || '' %>" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="mess_group_id">Mess group</label>
+        <select class="form-select" id="mess_group_id" name="mess_group_id">
+          <option value="0" <%= !currentFilters.mess_group_id || currentFilters.mess_group_id === '0' ? 'selected' : '' %>>All groups</option>
+          <% messGroups.forEach(group => { %>
+            <option value="<%= group.id %>" <%= Number(currentFilters.mess_group_id) === Number(group.id) ? 'selected' : '' %>><%= group.name %> (<%= group.code %>)</option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="member_id">Member</label>
+        <select class="form-select" id="member_id" name="member_id">
+          <option value="">All members</option>
+          <% members.forEach(member => { %>
+            <option value="<%= member.id %>" <%= Number(currentFilters.member_id) === Number(member.id) ? 'selected' : '' %>><%= member.name %> — <%= member.roll_number %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit">Generate report</button>
+        <a class="btn btn-outline-secondary" href="/reports/monthly">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<% if (report) { %>
+  <div class="row">
+    <div class="col-md-3 mb-3"><div class="card h-100"><div class="card-body">
+      <h6>Total expenses</h6><h3>₹<%= report.expenses %></h3>
+    </div></div></div>
+    <div class="col-md-3 mb-3"><div class="card h-100"><div class="card-body">
+      <h6>Group meal units</h6><h3><%= report.groupMealUnits %></h3>
+    </div></div></div>
+    <div class="col-md-3 mb-3"><div class="card h-100"><div class="card-body">
+      <h6>Calculated meal rate</h6><h3 class="text-success">₹<%= report.mealRate %></h3>
+      <small>Total expenses ÷ group meal units</small>
+    </div></div></div>
+    <div class="col-md-3 mb-3"><div class="card h-100"><div class="card-body">
+      <h6><%= report.selectedMember ? `${report.selectedMember.name}'s meal cost` : 'Selected meal units' %></h6>
+      <h3><%= report.selectedMember ? `₹${report.memberMealCost}` : report.memberMealUnits %></h3>
+      <small><%= report.memberMealUnits %> meal units</small>
+    </div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-white"><h5 class="mb-0">Daily meals and expenses</h5></div>
+    <div class="card-body"><canvas id="monthlyReportChart" aria-label="Daily meals and expenses" role="img"></canvas></div>
+  </div>
+  <script nonce="<%= cspNonce %>">
+    const reportDays = <%- JSON.stringify(chart.map((row) => String(row.day).slice(0, 10))) %>;
+    const reportMealUnits = <%- JSON.stringify(chart.map((row) => Number(row.meal_units))) %>;
+    const reportExpenses = <%- JSON.stringify(chart.map((row) => Number(row.expenses))) %>;
+    new Chart(document.getElementById('monthlyReportChart'), {
+      type: 'line',
+      data: {
+        labels: reportDays,
+        datasets: [
+          { label: 'Meal units', data: reportMealUnits, borderColor: '#0d6efd', backgroundColor: '#0d6efd22', yAxisID: 'y', tension: 0.25 },
+          { label: 'Expenses (₹)', data: reportExpenses, borderColor: '#dc3545', backgroundColor: '#dc354522', yAxisID: 'y1', tension: 0.25 }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Meal units' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Expenses (₹)' } }
+        }
+      }
+    });
+  </script>
+<% } %>

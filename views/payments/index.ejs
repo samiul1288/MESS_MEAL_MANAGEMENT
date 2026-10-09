@@ -1,0 +1,87 @@
+<h1>💳 Payment Management</h1>
+
+<div class="card mt-3">
+  <div class="card-header bg-white">
+    <form class="row g-3 align-items-center" method="get">
+      <% if (canManage) { %>
+        <div class="col-md-2">
+          <input class="form-control" type="month" name="payment_month" aria-label="Filter by payment month" value="<%= currentFilters.payment_month || '' %>">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="status" aria-label="Filter by payment status">
+            <option value="">All statuses</option>
+            <% ['paid', 'pending', 'partial', 'overdue'].forEach(status => { %>
+              <option value="<%= status %>" <%= currentFilters.status === status ? 'selected' : '' %>><%= status.charAt(0).toUpperCase() + status.slice(1) %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="member_id" aria-label="Filter by member">
+            <option value="">All members</option>
+            <% members.forEach(member => { %>
+              <option value="<%= member.id %>" <%= String(currentFilters.member_id || '') === String(member.id) ? 'selected' : '' %>><%= member.name %> — <%= member.roll_number %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input class="form-control" type="date" name="date_from" aria-label="Payment date from" value="<%= currentFilters.date_from || '' %>">
+        </div>
+        <div class="col-md-2">
+          <input class="form-control" type="date" name="date_to" aria-label="Payment date to" value="<%= currentFilters.date_to || '' %>">
+        </div>
+        <div class="col-md-2">
+          <input class="form-control" type="search" name="search" aria-label="Search members" placeholder="Search member" value="<%= currentFilters.search || '' %>">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100" type="submit">Filter</button>
+        </div>
+        <div class="col-md-2 text-end">
+          <a class="btn btn-success" href="/payments/create">Add Payment</a>
+        </div>
+      <% } %>
+    </form>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <% if (canManage) { %><th>Member</th><th>Group</th><% } %>
+            <th>Month</th>
+            <th>Payment Date</th>
+            <th>Amount</th>
+            <th>Method</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <% if (canManage) { %><th>Actions</th><% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (payments.length) { %>
+            <% payments.forEach(payment => { %>
+              <tr>
+                <% if (canManage) { %><td><%= payment.member_name %> (<%= payment.roll_number %>)</td><td><%= payment.mess_group_name %></td><% } %>
+                <td><%= payment.payment_month %></td>
+                <td><%= payment.payment_date || '—' %></td>
+                <td>₹<%= payment.amount.toFixed(2) %></td>
+                <td><%= payment.payment_method || '—' %></td>
+                <td><span class="badge bg-<%= payment.status === 'paid' ? 'success' : payment.status === 'overdue' ? 'danger' : 'warning' %>"><%= payment.status %></span></td>
+                <td><%= payment.notes || '—' %></td>
+                <% if (canManage) { %>
+                  <td class="d-flex gap-1">
+                    <a href="/payments/<%= payment.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form action="/payments/<%= payment.id %>/delete" method="POST" data-confirm="Delete this payment?">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                    </form>
+                  </td>
+                <% } %>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="<%= canManage ? 9 : 6 %>" class="text-center">No payments found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<section class="auth-page">
+  <div class="card auth-card">
+    <div class="card-body">
+      <div class="auth-brand">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span class="h3 mb-0">MessMate</span>
+      </div>
+      <div class="text-center mb-4">
+        <h1 class="h2 mb-2">Create your account</h1>
+        <p class="text-muted mb-0">Join your mess and keep your meals organized.</p>
+      </div>
+
+      <form action="/auth/register" method="POST">
+        <div class="mb-3">
+          <label for="fullName" class="form-label">Full name</label>
+          <input type="text" class="form-control" id="fullName" name="fullName" autocomplete="name" required minlength="2" maxlength="100">
+        </div>
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" autocomplete="username" required minlength="3" maxlength="50">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" autocomplete="email" required maxlength="100">
+        </div>
+        <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" required minlength="6">
+          <div class="form-text">Use at least 6 characters.</div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create account</button>
+      </form>
+      <p class="text-center text-muted mt-4 mb-0">Already registered? <a href="/auth/login">Sign in</a></p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,88 @@
+<h1>👥 <%= canManage ? 'Member Management' : 'My Profile' %></h1>
+
+<div class="card mt-3">
+  <% if (canManage) { %>
+  <div class="card-header bg-white">
+    <form class="row g-3 align-items-center" method="get">
+      <div class="col-md-3">
+        <input class="form-control" type="search" name="search" aria-label="Search members" placeholder="Search members..." value="<%= currentFilters?.search || '' %>">
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" name="status" aria-label="Filter by member status">
+          <option value="">All Status</option>
+          <option value="active" <%= currentFilters?.status == 'active' ? 'selected' : '' %>>Active</option>
+          <option value="inactive" <%= currentFilters?.status == 'inactive' ? 'selected' : '' %>>Inactive</option>
+          <option value="suspended" <%= currentFilters?.status == 'suspended' ? 'selected' : '' %>>Suspended</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" name="mess_group_id" aria-label="Filter by mess group">
+          <option value="">All Groups</option>
+          <% messGroups.forEach(g => { %>
+            <option value="<%= g.id %>" <%= currentFilters?.mess_group_id == g.id ? 'selected' : '' %>><%= g.name %> (<%= g.code %>)</option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" type="submit">Filter</button>
+      </div>
+      <div class="col-md-1">
+        <a class="btn btn-outline-secondary w-100" href="/members/create" aria-label="Add member">Add</a>
+      </div>
+    </form>
+  </div>
+  <% } %>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Roll No.</th>
+            <th>Hall</th>
+            <th>Room</th>
+            <th>Batch</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Group</th>
+            <% if (canManage) { %><th>Actions</th><% } %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (members && members.length > 0) { %>
+            <% members.forEach(member => { %>
+              <tr>
+                <td><%= member.name %></td>
+                <td><%= member.roll_number %></td>
+                <td><%= member.hall %></td>
+                <td><%= member.room || '-' %></td>
+                <td><%= member.batch %></td>
+                <td><%= member.phone || '-' %></td>
+                <td><%= member.email %></td>
+                <td>
+                  <span class="badge bg-<%= member.status === 'active' ? 'success' : member.status === 'suspended' ? 'danger' : 'warning' %>">
+                    <%= member.status %>
+                  </span>
+                </td>
+                <td><%= member.mess_group_name %></td>
+                <% if (canManage) { %>
+                <td class="d-flex gap-1">
+                  <a href="/members/<%= member.id %>/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                  <form action="/members/<%= member.id %>/delete" method="POST" class="inline-form" data-confirm="Delete this member?">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
+                </td>
+                <% } %>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="<%= canManage ? 10 : 9 %>" class="text-center">No members found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

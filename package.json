@@ -1,0 +1,31 @@
+{
+  "name": "messmate",
+  "version": "1.0.0",
+  "description": "Mess/Mess hall meal and expense management system",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed-admin": "node scripts/seed-admin.js",
+    "test": "jest --runInBand --runTestsByPath tests/http.test.js",
+    "test:unit": "node --test tests/crud.test.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "helmet": "^7.1.0",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.1.4"
+  }
+}

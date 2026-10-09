@@ -1,0 +1,50 @@
+<h1>➕ Add Member</h1>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="/members/create" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="mess_group_id">Mess Group</label>
+          <select class="form-select" id="mess_group_id" name="mess_group_id" required>
+            <% messGroups.forEach(g => { %>
+              <option value="<%= g.id %>"><%= g.name %> (<%= g.code %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="roll_number">Roll Number</label>
+          <input type="text" class="form-control" id="roll_number" name="roll_number" required placeholder="e.g. CSE2024001">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="name">Name</label>
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="hall">Hall</label>
+          <input type="text" class="form-control" id="hall" name="hall" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="room">Room</label>
+          <input type="text" class="form-control" id="room" name="room">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="batch">Batch</label>
+          <input type="text" class="form-control" id="batch" name="batch" placeholder="e.g. 2024">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="phone">Phone</label>
+          <input type="text" class="form-control" id="phone" name="phone">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input type="email" class="form-control" id="email" name="email">
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Save Member</button>
+        <a href="/members" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
