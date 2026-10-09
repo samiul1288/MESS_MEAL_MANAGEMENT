@@ -84,6 +84,36 @@ describe('HTTP authentication and meal CRUD', () => {
     await agent.get('/profile').expect(302).expect('Location', '/auth/login');
   });
 
+  test('registration links a matching member profile and starts the account in its assigned group', async () => {
+    querySpy
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] })
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] })
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ id: 52, full_name: 'New Member', role: 'member', mess_group_id: null }],
+      })
+      .mockResolvedValueOnce({ rows: [{ mess_group_id: 7 }] });
+
+    const agent = request.agent(app);
+    const response = await agent
+      .post('/auth/register')
+      .type('form')
+      .send({
+        fullName: 'New Member',
+        username: 'new-member',
+        email: 'new-member@example.test',
+        password: 'secure-password',
+      })
+      .expect(302)
+      .expect('Location', '/');
+
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringContaining('connect.sid=')])
+    );
+    expect(querySpy.mock.calls[3][0]).toContain('UPDATE members m');
+    expect(querySpy.mock.calls[3][1]).toEqual([52, 'new-member@example.test']);
+  });
+
   test('logs out through POST and invalidates the authenticated session', async () => {
     querySpy.mockResolvedValueOnce({
       rows: [{
@@ -138,6 +168,7 @@ describe('HTTP authentication and meal CRUD', () => {
       .send({ username: 'member', password: 'correct-password' })
       .expect(302);
 
+    await agent.get('/groups').expect(403);
     await agent.post('/expenses/create').type('form').send({}).expect(403);
 
     await agent

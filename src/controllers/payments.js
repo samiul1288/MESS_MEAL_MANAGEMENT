@@ -76,7 +76,10 @@ exports.index = async (req, res) => {
       conditions.push(`EXISTS (
         SELECT 1
         FROM members own_member
-        JOIN users own_user ON LOWER(own_member.email) = LOWER(own_user.email)
+        JOIN users own_user ON (
+          own_member.user_id = own_user.id
+          OR (own_member.user_id IS NULL AND LOWER(own_member.email) = LOWER(own_user.email))
+        )
         WHERE own_member.id = p.member_id
           AND own_user.id = $${params.length}
           AND own_member.mess_group_id = own_user.mess_group_id

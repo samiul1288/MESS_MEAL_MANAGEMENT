@@ -1,0 +1,80 @@
+<h1><%= heading %></h1>
+
+<% if (validationErrors.length) { %>
+  <div class="alert alert-danger mt-3" role="alert">
+    <ul class="mb-0"><% validationErrors.forEach(error => { %><li><%= error %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="<%= action %>" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="mess_group_id">Mess Group</label>
+          <select class="form-select" id="mess_group_id" name="mess_group_id" required>
+            <option value="">Select a group</option>
+            <% messGroups.forEach(group => { %>
+              <option value="<%= group.id %>" <%= String(member.mess_group_id || '') === String(group.id) ? 'selected' : '' %>><%= group.name %> (<%= group.code %>)</option>
+            <% }); %>
+          </select>
+          <% if (!messGroups.length) { %><div class="form-text text-danger">Create a mess group before adding members.</div><% } %>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="account_id">Member login account (optional)</label>
+          <select class="form-select" id="account_id" name="account_id">
+            <option value="">No login account linked</option>
+            <% accounts.forEach(account => { %>
+              <option value="<%= account.id %>" <%= String(member.account_id || '') === String(account.id) ? 'selected' : '' %>>
+                <%= account.full_name %> (@<%= account.username %>) — <%= account.email %><%= account.linked ? ' (currently linked)' : '' %>
+              </option>
+            <% }); %>
+          </select>
+          <div class="form-text">The selected account receives this group assignment and its email is used for the member profile.</div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="roll_number">Roll Number</label>
+          <input class="form-control" id="roll_number" name="roll_number" maxlength="20" value="<%= member.roll_number || '' %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="name">Name</label>
+          <input class="form-control" id="name" name="name" maxlength="100" value="<%= member.name || '' %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="hall">Hall</label>
+          <input class="form-control" id="hall" name="hall" maxlength="50" value="<%= member.hall || '' %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="room">Room</label>
+          <input class="form-control" id="room" name="room" maxlength="20" value="<%= member.room || '' %>">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="batch">Batch</label>
+          <input class="form-control" id="batch" name="batch" maxlength="20" value="<%= member.batch || '' %>">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label" for="phone">Phone</label>
+          <input class="form-control" id="phone" name="phone" maxlength="15" value="<%= member.phone || '' %>">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label" for="email">Email (used if no login account is selected)</label>
+          <input class="form-control" type="email" id="email" name="email" maxlength="100" value="<%= member.email || '' %>">
+        </div>
+        <% if (member.id) { %>
+          <div class="col-md-4 mb-3">
+            <label class="form-label" for="status">Status</label>
+            <select class="form-select" id="status" name="status">
+              <% ['active', 'inactive', 'suspended'].forEach(status => { %>
+                <option value="<%= status %>" <%= (member.status || 'active') === status ? 'selected' : '' %>><%= status.charAt(0).toUpperCase() + status.slice(1) %></option>
+              <% }); %>
+            </select>
+          </div>
+        <% } %>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit" <%= !messGroups.length ? 'disabled' : '' %>>Save member</button>
+        <a class="btn btn-outline-secondary" href="/members">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

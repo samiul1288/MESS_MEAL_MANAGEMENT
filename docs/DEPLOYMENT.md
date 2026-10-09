@@ -23,10 +23,12 @@ $env:DATABASE_URL = "your-production-postgresql-connection-string"
 npm run db:migrate
 ```
 
-The command creates the initial schema if needed and applies the meal and
-PostgreSQL session-store migrations. Do not run it against a database containing
-data you are not prepared to change. The Vercel function only checks database
-connectivity; it does not run schema changes during cold starts.
+The command creates the initial schema if needed and applies the meal,
+PostgreSQL session-store, and member-account linking migrations. Existing member
+profiles are linked to matching member login accounts by email where possible.
+Do not run it against a database containing data you are not prepared to change.
+The Vercel function only checks database connectivity; it does not run schema
+changes during cold starts.
 
 ## Create the first admin account
 

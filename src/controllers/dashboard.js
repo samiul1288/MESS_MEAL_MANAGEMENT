@@ -8,7 +8,10 @@ exports.member = async (req, res) => {
     const memberResult = await pool.query(
       `SELECT id, name, roll_number
        FROM members
-       WHERE LOWER(email) = LOWER((SELECT email FROM users WHERE id = $1))
+       WHERE (user_id = $1 OR (
+                user_id IS NULL
+                AND LOWER(email) = LOWER((SELECT email FROM users WHERE id = $1))
+             ))
          AND ($2::integer IS NULL OR mess_group_id = $2)
        ORDER BY id
        LIMIT 1`,

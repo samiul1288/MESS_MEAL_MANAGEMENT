@@ -90,6 +90,31 @@ router.post('/register', validateRegistration, async (req, res) => {
     );
 
     const user = result.rows[0];
+    const linkedMember = await pool.query(
+      `WITH candidate AS (
+         SELECT id, mess_group_id
+         FROM members
+         WHERE LOWER(email) = LOWER($2)
+           AND user_id IS NULL
+         ORDER BY id
+         LIMIT 1
+         FOR UPDATE
+       ),
+       linked AS (
+         UPDATE members m
+         SET user_id = $1
+         FROM candidate
+         WHERE m.id = candidate.id
+         RETURNING m.mess_group_id
+       )
+       UPDATE users
+       SET mess_group_id = (SELECT mess_group_id FROM linked),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING mess_group_id`,
+      [user.id, email.trim()]
+    );
+    user.mess_group_id = linkedMember.rows[0].mess_group_id;
 
     req.session.regenerate((err) => {
       if (err) {

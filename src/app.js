@@ -141,6 +141,7 @@ const expensesRouter = require('./routes/expenses');
 const membersRouter = require('./routes/members');
 const reportsRouter = require('./routes/reports');
 const paymentsRouter = require('./routes/payments');
+const groupsRouter = require('./routes/groups');
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
@@ -149,6 +150,7 @@ app.use('/expenses', expensesRouter);
 app.use('/members', membersRouter);
 app.use('/reports', reportsRouter);
 app.use('/payments', paymentsRouter);
+app.use('/groups', groupsRouter);
 
 // ============================================================
 // 404 Handler

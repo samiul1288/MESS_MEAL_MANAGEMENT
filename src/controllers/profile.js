@@ -29,11 +29,11 @@ exports.show = async (req, res) => {
       const memberResult = await pool.query(
         `SELECT name, roll_number, hall, room, phone
          FROM members
-         WHERE LOWER(email) = LOWER($1)
-           AND ($2::integer IS NULL OR mess_group_id = $2)
+        WHERE (user_id = $1 OR (user_id IS NULL AND LOWER(email) = LOWER($2)))
+          AND ($3::integer IS NULL OR mess_group_id = $3)
          ORDER BY id
          LIMIT 1`,
-        [user.email, req.session.messGroupId || null]
+        [req.session.userId, user.email, req.session.messGroupId || null]
       );
       member = memberResult.rows[0] || null;
     }

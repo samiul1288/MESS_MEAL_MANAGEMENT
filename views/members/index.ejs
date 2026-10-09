@@ -44,6 +44,7 @@
             <th>Batch</th>
             <th>Phone</th>
             <th>Email</th>
+            <% if (canManage) { %><th>Login account</th><% } %>
             <th>Status</th>
             <th>Group</th>
             <% if (canManage) { %><th>Actions</th><% } %>
@@ -60,6 +61,7 @@
                 <td><%= member.batch %></td>
                 <td><%= member.phone || '-' %></td>
                 <td><%= member.email %></td>
+                <% if (canManage) { %><td><%= member.account_username ? `@${member.account_username}` : 'Not linked' %></td><% } %>
                 <td>
                   <span class="badge bg-<%= member.status === 'active' ? 'success' : member.status === 'suspended' ? 'danger' : 'warning' %>">
                     <%= member.status %>
@@ -78,7 +80,7 @@
             <% }); %>
           <% } else { %>
             <tr>
-              <td colspan="<%= canManage ? 10 : 9 %>" class="text-center">No members found</td>
+              <td colspan="<%= canManage ? 11 : 9 %>" class="text-center">No members found</td>
             </tr>
           <% } %>
         </tbody>

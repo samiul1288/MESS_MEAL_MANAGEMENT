@@ -73,6 +73,12 @@ const initialize = async () => {
   );
   await pool.query(sessionMigration);
 
+  const memberAccountMigration = fs.readFileSync(
+    path.join(__dirname, '../../db/migrations/003_member_account_group_link.sql'),
+    'utf8'
+  );
+  await pool.query(memberAccountMigration);
+
   return pool;
 };
 

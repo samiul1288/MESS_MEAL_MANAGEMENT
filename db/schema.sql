@@ -37,6 +37,7 @@ CREATE TABLE users (
 -- ============================================================
 CREATE TABLE members (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     mess_group_id INTEGER NOT NULL REFERENCES mess_groups(id) ON DELETE CASCADE,
     roll_number VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(100) NOT NULL,

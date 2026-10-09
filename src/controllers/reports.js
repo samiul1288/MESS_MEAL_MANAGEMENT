@@ -134,7 +134,10 @@ exports.monthlyReport = async (req, res) => {
     const membersResult = await pool.query(
       `SELECT DISTINCT member.id, member.name, member.roll_number
        FROM members member
-       JOIN users owner ON LOWER(owner.email) = LOWER(member.email)
+       JOIN users owner ON (
+         member.user_id = owner.id
+         OR (member.user_id IS NULL AND LOWER(owner.email) = LOWER(member.email))
+       )
        WHERE ($1::integer IS NULL OR member.mess_group_id = $1)
        ORDER BY member.name`,
       [groupId]
@@ -161,7 +164,10 @@ exports.monthlyReport = async (req, res) => {
       ? await pool.query(
           `SELECT owner.id
            FROM members member
-           JOIN users owner ON LOWER(owner.email) = LOWER(member.email)
+           JOIN users owner ON (
+             member.user_id = owner.id
+             OR (member.user_id IS NULL AND LOWER(owner.email) = LOWER(member.email))
+           )
            WHERE member.id = $1
            ORDER BY owner.id
            LIMIT 1`,

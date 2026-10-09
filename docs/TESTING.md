@@ -39,6 +39,16 @@
 - [ ] Submit invalid dates, quantities, meal types, or amounts; confirm server-side validation rejects them.
 - [ ] Try a SQL-looking menu string such as `x'); DROP TABLE meals; --`; confirm it is stored/rendered as text and no SQL executes.
 
+## Mess groups and member account assignment
+
+- [ ] As an admin, open **Groups**, create a group with a unique code, and confirm it appears in group selectors.
+- [ ] Create a member login account through registration, then add a member profile and select that login account; confirm its dashboard shows the assigned group.
+- [ ] Create a member profile without selecting a login account; confirm another same-email account is not linked implicitly.
+- [ ] Create a member profile first, then register an account with the same email; confirm registration links that account to the profile's group.
+- [ ] Change a member profile's group and confirm the linked account receives the new group after its next login.
+- [ ] Confirm a group with members, users, meals, expenses, payments, or notices cannot be deleted.
+- [ ] Confirm a member cannot open or modify the admin-only Groups pages.
+
 ## Bazar expenses and payments
 
 - [ ] As an admin, add, edit, search/filter, and delete a bazar expense; verify date, member, category, and amount filters.

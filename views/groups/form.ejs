@@ -1,0 +1,31 @@
+<h1><%= heading %></h1>
+
+<% if (validationErrors.length) { %>
+  <div class="alert alert-danger mt-3" role="alert">
+    <ul class="mb-0"><% validationErrors.forEach(error => { %><li><%= error %></li><% }); %></ul>
+  </div>
+<% } %>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <form action="<%= action %>" method="POST">
+      <div class="mb-3">
+        <label class="form-label" for="name">Group name</label>
+        <input class="form-control" id="name" name="name" minlength="2" maxlength="100" value="<%= group.name || '' %>" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="code">Group code</label>
+        <input class="form-control text-uppercase" id="code" name="code" minlength="2" maxlength="20" pattern="[A-Za-z0-9_-]{2,20}" value="<%= group.code || '' %>" required>
+        <div class="form-text">Use 2–20 letters, numbers, hyphens, or underscores. Codes must be unique.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="description">Description (optional)</label>
+        <textarea class="form-control" id="description" name="description" maxlength="1000" rows="3"><%= group.description || '' %></textarea>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Save group</button>
+        <a class="btn btn-outline-secondary" href="/groups">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

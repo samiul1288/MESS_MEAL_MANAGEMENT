@@ -10,6 +10,8 @@ const reportsController = require('../src/controllers/reports');
 const profileController = require('../src/controllers/profile');
 const app = require('../src/app');
 const paymentsController = require('../src/controllers/payments');
+const groupsController = require('../src/controllers/groups');
+const membersController = require('../src/controllers/members');
 const auth = require('../src/middleware/auth');
 const { validAmount, validDate } = require('../src/utils/validation');
 
@@ -87,7 +89,7 @@ test('profile page loads only the authenticated user and their linked member pro
     assert.equal(res.rendered.locals.member.roll_number, 'R41');
     assert.equal(res.rendered.locals.homeUrl, '/dashboard');
   });
-  assert.deepEqual(calls.map(([, params]) => params), [[41], ['member@example.test', 7]]);
+  assert.deepEqual(calls.map(([, params]) => params), [[41], [41, 'member@example.test', 7]]);
 });
 
 test('meal uniqueness allows separate member entries for the same meal slot', () => {
@@ -303,4 +305,74 @@ test('non-admin users receive forbidden status from the admin guard', () => {
   });
   assert.equal(res.statusCode, 403);
   assert.equal(res.rendered.view, 'errors/403');
+});
+
+test('member account migration links existing profiles and keeps account links unique', () => {
+  const migration = fs.readFileSync(
+    path.join(__dirname, '../db/migrations/003_member_account_group_link.sql'),
+    'utf8'
+  );
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users/);
+  assert.match(migration, /LOWER\(m\.email\) = LOWER\(u\.email\)/);
+  assert.match(migration, /CREATE UNIQUE INDEX IF NOT EXISTS uq_members_user_id/);
+  assert.match(migration, /UPDATE users u[\s\S]+SET mess_group_id = m\.mess_group_id/);
+});
+
+test('member creation links the selected account and assigns its group transactionally', async () => {
+  const calls = [];
+  const client = {
+    async query(sql, params) {
+      calls.push([sql, params]);
+      if (sql.includes('FROM mess_groups WHERE id')) return { rowCount: 1, rows: [{ id: 7 }] };
+      if (sql.includes('FROM users u')) {
+        return { rowCount: 1, rows: [{ id: 41, email: 'member@example.test' }] };
+      }
+      return { rowCount: 1, rows: [] };
+    },
+    release() {},
+  };
+  const originalConnect = pool.connect;
+  pool.connect = async () => client;
+  try {
+    const req = {
+      session: {},
+      body: {
+        mess_group_id: '7',
+        account_id: '41',
+        roll_number: 'R41',
+        name: 'Test Member',
+        hall: 'North',
+        room: '10',
+        batch: '2026',
+        phone: '555',
+        status: 'active',
+      },
+    };
+    const res = response();
+    await membersController.create(req, res);
+    assert.equal(res.redirectedTo, '/members');
+    assert.match(req.session.flash.success, /assigned/);
+    const insert = calls.find(([sql]) => sql.includes('INSERT INTO members'));
+    assert.deepEqual(insert[1], [41, '7', 'R41', 'Test Member', 'North', '10', '2026', '555', 'member@example.test', 'active']);
+    assert.ok(calls.some(([sql, params]) => sql.includes('UPDATE users SET mess_group_id') && params[0] === '7' && params[1] === 41));
+    assert.equal(calls[0][0], 'BEGIN');
+    assert.equal(calls.at(-1)[0], 'COMMIT');
+  } finally {
+    pool.connect = originalConnect;
+  }
+});
+
+test('group deletion is refused while records or members reference it', async () => {
+  let queryCount = 0;
+  await withMockQuery(async () => {
+    queryCount += 1;
+    return { rows: [{ usage_count: '2' }] };
+  }, async () => {
+    const req = { params: { id: '7' }, session: {} };
+    const res = response();
+    await groupsController.delete(req, res);
+    assert.equal(res.redirectedTo, '/groups');
+    assert.equal(req.session.flash.error.includes('linked users or records'), true);
+  });
+  assert.equal(queryCount, 1);
 });
